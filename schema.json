@@ -1,0 +1,187 @@
+[
+{
+	"id": "tableNamePattern",
+	"type": "string", 
+	"pattern": "^_\\w{3,5}$"
+},
+{
+	"id": "types",
+	"type": "string", "enum": ["dynamo", "s3_text", "file", "image"]
+},
+{	"id": "file",
+	"type": "object", 
+	"properties": {
+		"endpoint": {"type": "string"}
+	}
+},
+{
+	"id": "s3_text",
+	"type": "object", 
+	"properties": {
+		"endpoint": {"type": "null"},
+		"region": {"type": "string"},
+		"profile": {"type": "string"},
+		"bucket": {"type": "string"}
+	}
+	
+},
+{
+	"id": "category",
+	"type": "object",
+	"properties": {
+		"name": {"type": "string"},
+		"id": {"type": "number"},
+		"options": {"type": "object"}
+	}
+},
+{
+	"id": "dynamo",
+	"type": "object", 
+	"properties": {
+		"endpoint": {"type": "string"},
+		"region": {"type": "string"},
+		"profile": {"type": "string"},
+		"settings": {
+			"type": "object", 
+			"properties": {
+				"size": {"type": "number", "maximum": 25, "minimum": 1},
+				"startingDelay": {"type": "number", "multipleOf": 100 },
+				"increment": {"type": "number", "multipleOf": 100},
+				"tables": {
+					"type" : "object",
+					"properties": {
+						"diff": {"$ref": "tableNamePattern"},
+						"raw": {"$ref": "tableNamePattern"},
+						"store": {"$ref": "tableNamePattern"}
+					}
+				}
+			}
+		}
+	}
+},
+{
+	"id":"jobObj",
+	"type": "object",
+	"properties": {
+		"date": { "type": "string", "format": "isDate" },
+		"configuration": {
+			"type": "object", 
+			"properties": {
+				"mode": {"type": "string", "enum":["NORMAL", "TEST"]},
+				"location": {"type": "string", "enum": ["LOCAL", "REMOTE"]},
+				"source": {"$ref": "types"},
+				"destination": {"$ref": "types"},
+				"dataStore": {
+					"type": "object",
+					"properties": {
+						"read": {
+							"type": "object",
+							"properties": {
+								"remote": {
+									"type": "object", 
+									"properties": {
+										"dynamo": {"$ref": "dynamo"},
+										"s3_text": {"$ref": "s3_text"}
+									}
+								},
+								"local": {
+									"type": "object",
+									"properties": {
+										"dynamo": {"$ref": "dynamo"},
+										"s3_text": {"$ref": "s3_text"},
+										"file": {"$ref": "file"}
+									}
+								}
+							}
+						},
+						"write": {
+							"type": "object",
+							"properties": {
+								"remote": {
+									"type": "object", 
+									"properties": {
+										"dynamo": {"$ref": "dynamo"},
+										"s3_text": {"$ref": "s3_text"}
+									}
+								},
+								"local": {
+									"type": "object", 
+									"properties": {
+										"dynamo": {"$ref": "dynamo"},
+										"s3_text": {"$ref": "s3_text"},
+										"file": {"$ref": "file"}
+									}
+								}
+							}
+						}
+					}
+				},
+				"imageStore": {
+					"type": "object",
+					"properties": {
+						"remote": {
+							"type": "object",
+							"properties": {
+								"endpoint": {"type": "null"},
+								"region": {"type": "string"},
+								"profile": {"type": "string"},
+								"bucket": {"type": "string"},
+								"imageDirectory": {"type": "string"}
+							}
+						},
+						"local": {
+							"type": "object",
+							"properties": {
+								"imageDirectory": {"type": "string"}
+							}
+						}
+					}
+				},
+				"indexStore": {
+					"type": "object",
+					"properties": {
+						"remote": {"type": "object"},
+						"local": {"type": "object"}
+					}
+				}
+			}
+		},
+		"source": {
+			"type": "object",
+			"properties": {
+				"domain": {"type": "string"},
+				"pageUrlTemplate": {"type": "string"},
+				"settings": {
+					"type": "object",
+					"properties": {
+						"directories": {
+							"type": "object",
+							"properties": {
+								"rawTable": {"type": "string"},
+								"diffTable": {"type": "string"},
+								"storeTable": {"type": "string"}
+							}
+						},
+						"images": {
+							"type": "object",
+							"properties": {
+								"directory": {"type": "string"},
+								"thumbnail": {"type": "string", "pattern": "^\\d{1,4}$"},
+								"additional": {"type": "string", "pattern": "^\\d{1,4}$"}
+							}
+						}
+					}
+				}
+			}
+		},
+		"category": {"$ref": "category"},
+		"categories": {"type": "array"},
+		"report": {"type": "object"},
+		"items": {"type": "array"},
+		"raw": {"type": "array"},
+		"data": {"type": "object"},
+		"task": {"type": "object"},
+		"tasks": {"type": "array"}
+	},
+	"required": ["date", "source", "configuration", "category", "categories", "report", "items", "raw", "data", "task", "tasks"]
+}]
